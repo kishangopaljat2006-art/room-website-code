@@ -1,0 +1,75 @@
+-- Digital Rental & Booking System Database Schema
+CREATE DATABASE IF NOT EXISTS booking_system;
+USE booking_system;
+
+CREATE TABLE IF NOT EXISTS Users (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) UNIQUE NOT NULL,
+    Phone VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Locations (
+    LocationID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Address VARCHAR(255) NOT NULL,
+    City VARCHAR(100) NOT NULL,
+    Country VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Services (
+    ServiceID INT AUTO_INCREMENT PRIMARY KEY,
+    LocationID INT,
+    Name VARCHAR(255) NOT NULL,
+    Description TEXT,
+    Price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (LocationID) REFERENCES Locations(LocationID) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS Bookings (
+    BookingID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
+    ServiceID INT NOT NULL,
+    BookingDate DATE NOT NULL,
+    Status VARCHAR(50) DEFAULT 'Pending',
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (ServiceID) REFERENCES Services(ServiceID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Payment (
+    PaymentID INT AUTO_INCREMENT PRIMARY KEY,
+    BookingID INT UNIQUE NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PaymentMethod VARCHAR(100) NOT NULL,
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS TenantVerification (
+    VerificationID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
+    AadhaarNumberHash VARCHAR(255) NOT NULL,
+    ConsentGiven BOOLEAN DEFAULT FALSE NOT NULL,
+    PoliceVerificationStatus VARCHAR(50) DEFAULT 'Pending',
+    VerificationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    DocumentURL VARCHAR(500),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS RentAgreements (
+    AgreementID INT AUTO_INCREMENT PRIMARY KEY,
+    BookingID INT UNIQUE NOT NULL,
+    TenantID INT NOT NULL,
+    LandlordID INT NOT NULL,
+    DurationMonths INT DEFAULT 11 CHECK (DurationMonths <= 11),
+    EStampNumber VARCHAR(100),
+    IsTenantSigned BOOLEAN DEFAULT FALSE,
+    IsLandlordSigned BOOLEAN DEFAULT FALSE,
+    AgreementStatus VARCHAR(50) DEFAULT 'Draft',
+    StartDate DATE NOT NULL,
+    EndDate DATE NOT NULL,
+    AgreementPDFURL VARCHAR(500),
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID) ON DELETE CASCADE,
+    FOREIGN KEY (TenantID) REFERENCES Users(UserID),
+    FOREIGN KEY (LandlordID) REFERENCES Users(UserID)
+);
