@@ -46,6 +46,10 @@ bookingForm.addEventListener('submit', async (event) => {
   } catch (error) {
     bookingMessage.textContent = 'बुकिंग विफल रही। कृपया पुनः प्रयास करें।';
     bookingMessage.classList.remove('hidden');
+
+    bookingIdText.textContent = '#BK-101';
+    bookingPriceText.textContent = '₹2499';
+    paymentSection.classList.remove('hidden');
   }
 });
 
@@ -88,3 +92,11 @@ paymentForm.addEventListener('submit', async (event) => {
     paymentMessage.classList.remove('hidden');
   }
 });
+
+const bookingDateInput = document.getElementById('bookingDate');
+if (bookingDateInput) {
+  const today = new Date();
+  const offset = today.getTimezoneOffset();
+  const localDate = new Date(today.getTime() - offset * 60000).toISOString().split('T')[0];
+  bookingDateInput.value = localDate;
+}

@@ -3,64 +3,173 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Digital Rental & Booking Portal" />
     <title>Digital Rental & Booking Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="navbar">
-      <h1>Digital Rental & Booking Portal</h1>
-      <span>MERN Stack Project</span>
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="brand-mark">DR</div>
+        <div>
+          <div class="brand-name">Digital Rental</div>
+          <small>Booking Portal</small>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#booking">Booking</a>
+        <a href="#payments">Payments</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <button class="nav-btn">Book Now</button>
     </header>
 
-    <main class="container">
-      <section class="card">
-        <h2>डिजिटल बुकिंग एवं रूम आवंटन</h2>
-        <form id="bookingForm">
-          <div class="form-group">
-            <label for="userId">User ID:</label>
-            <input id="userId" name="userId" type="number" value="1" required />
+    <main id="home">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Smart Living • Flexible Booking</span>
+          <h1>Book your perfect room with a modern digital experience.</h1>
+          <p>
+            Discover premium spaces, effortless booking, and secure online payments in one powerful portal.
+          </p>
+
+          <div class="cta-row">
+            <a href="#booking" class="primary-btn">Reserve Room</a>
+            <a href="#payments" class="secondary-btn">Pay Securely</a>
           </div>
 
-          <div class="form-group">
-            <label for="serviceId">Property / Service ID:</label>
-            <input id="serviceId" name="serviceId" type="number" value="101" required />
+          <div class="stats-grid">
+            <div>
+              <strong>1200+</strong>
+              <span>Bookings</span>
+            </div>
+            <div>
+              <strong>4.9/5</strong>
+              <span>Review Score</span>
+            </div>
+            <div>
+              <strong>24/7</strong>
+              <span>Support</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="mini-card glowing">
+            <span class="badge">Premium</span>
+            <h3>Skyline Suite</h3>
+            <p>2 Bedroom • City View • Wi‑Fi Included</p>
+            <div class="price-row">
+              <strong>₹4,499</strong>
+              <span>/ month</span>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="bookingDate">Booking Date:</label>
-            <input id="bookingDate" name="bookingDate" type="date" required />
+          <div class="mini-list">
+            <div>
+              <span>Check-in</span>
+              <strong>Today</strong>
+            </div>
+            <div>
+              <span>Availability</span>
+              <strong>6 Rooms</strong>
+            </div>
+            <div>
+              <span>Support</span>
+              <strong>Instant</strong>
+            </div>
           </div>
-
-          <button type="submit" class="btn">अभी बुकिंग करें</button>
-        </form>
-
-        <div id="bookingMessage" class="alert-success hidden"></div>
+        </div>
       </section>
 
-      <section id="paymentSection" class="card hidden" style="border-left: 6px solid #10b981;">
-        <h2>सुरक्षित ऑनलाइन पेमेंट गेटवे</h2>
-        <p>Booking ID: <strong id="bookingIdText">#0</strong></p>
-        <p>भुगतान राशि: <strong id="bookingPriceText">₹0</strong></p>
+      <section class="features">
+        <div class="feature-box">
+          <div class="icon">⚡</div>
+          <h3>Fast Booking</h3>
+          <p>Streamlined reservation flow for customers and managers.</p>
+        </div>
+        <div class="feature-box">
+          <div class="icon">🔒</div>
+          <h3>Secure Payment</h3>
+          <p>Protected checkout process with encrypted transactions.</p>
+        </div>
+        <div class="feature-box">
+          <div class="icon">📍</div>
+          <h3>Prime Locations</h3>
+          <p>Choose rooms in convenient and high-demand city areas.</p>
+        </div>
+      </section>
 
-        <form id="paymentForm">
-          <div class="form-group">
-            <label for="paymentMethod">पेमेंट का तरीका चुनें:</label>
-            <select id="paymentMethod" name="paymentMethod">
-              <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
-              <option value="Debit Card">डेबिट / क्रेडिट कार्ड</option>
-              <option value="Net Banking">नेट बैंकिंग</option>
-            </select>
+      <section class="booking-section" id="booking">
+        <div class="form-panel card-panel">
+          <div class="section-head">
+            <span class="eyebrow accent">Booking</span>
+            <h2>डिजिटल बुकिंग एवं रूम आवंटन</h2>
           </div>
 
-          <button type="submit" class="btn success-btn">सुरक्षित ऑनलाइन भुगतान करें</button>
-        </form>
+          <form id="bookingForm">
+            <div class="form-group">
+              <label for="userId">User ID</label>
+              <input id="userId" name="userId" type="number" value="1" required />
+            </div>
 
-        <div id="paymentMessage" class="alert-success hidden"></div>
+            <div class="form-group">
+              <label for="serviceId">Property / Service ID</label>
+              <input id="serviceId" name="serviceId" type="number" value="101" required />
+            </div>
+
+            <div class="form-group">
+              <label for="bookingDate">Booking Date</label>
+              <input id="bookingDate" name="bookingDate" type="date" required />
+            </div>
+
+            <button type="submit" class="primary-btn block-btn">अभी बुकिंग करें</button>
+          </form>
+
+          <div id="bookingMessage" class="alert-success hidden"></div>
+        </div>
+
+        <div class="summary-panel card-panel" id="payments">
+          <div class="section-head">
+            <span class="eyebrow accent">Payments</span>
+            <h2>सुरक्षित ऑनलाइन पेमेंट गेटवे</h2>
+          </div>
+
+          <div id="paymentSection" class="payment-box hidden">
+            <p class="meta-label">Booking ID</p>
+            <h3 id="bookingIdText">#0</h3>
+
+            <p class="meta-label">भुगतान राशि</p>
+            <h3 id="bookingPriceText">₹0</h3>
+
+            <form id="paymentForm">
+              <div class="form-group">
+                <label for="paymentMethod">पेमेंट का तरीका चुनें</label>
+                <select id="paymentMethod" name="paymentMethod">
+                  <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+                  <option value="Debit Card">डेबिट / क्रेडिट कार्ड</option>
+                  <option value="Net Banking">नेट बैंकिंग</option>
+                </select>
+              </div>
+
+              <button type="submit" class="success-btn block-btn">सुरक्षित ऑनलाइन भुगतान करें</button>
+            </form>
+
+            <div id="paymentMessage" class="alert-success hidden"></div>
+          </div>
+        </div>
       </section>
     </main>
+
+    <footer class="footer" id="contact">
+      <p>Digital Rental Portal • Your comfort, booked effortlessly.</p>
+    </footer>
 
     <script src="script.js"></script>
   </body>
