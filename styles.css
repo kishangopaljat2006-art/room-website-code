@@ -140,6 +140,37 @@ button {
   font-size: 0.88rem;
 }
 
+.language-toggle {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.language-toggle:hover {
+  border-color: var(--primary);
+  background: #fff3ef;
+}
+
+.language-icon {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
 .nav-btn:hover,
 .primary-btn:hover,
 .success-btn:hover,
@@ -991,27 +1022,42 @@ main {
   }
 
   .topbar {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 13px;
   }
 
   .nav-links {
-    order: 3;
+    grid-area: 3 / 1 / 4 / 3;
     width: 100%;
     justify-content: center;
-    gap: 22px;
+    flex-wrap: wrap;
+    gap: 8px 16px;
     padding: 6px 0 9px;
     border-top: 1px solid var(--border);
   }
 
   .nav-links a {
-    font-size: 0.82rem;
+    font-size: 0.76rem;
   }
 
   .nav-btn {
+    grid-area: 2 / 2;
     min-height: 40px;
     padding: 0 13px;
     font-size: 0.78rem;
+  }
+
+  .language-toggle {
+    grid-area: 1 / 2;
+    min-height: 40px;
+    padding: 0 10px;
+    font-size: 0.76rem;
+  }
+
+  .brand-wrap {
+    grid-area: 1 / 1;
+    min-width: 0;
   }
 
   .hero {
