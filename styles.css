@@ -550,6 +550,41 @@ main {
   object-fit: cover;
 }
 
+.bathroom-photo {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.bathroom-photo img {
+  width: 82px;
+  height: 62px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.upload-preview {
+  display: block;
+  width: min(100%, 280px);
+  max-height: 170px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.form-group .field-hint {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
 .visual-one {
   background-image: url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85');
 }

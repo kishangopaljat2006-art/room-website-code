@@ -125,10 +125,10 @@ function requestOptions(body, token) {
 function createLocationLink(listing) {
   const link = document.createElement('a');
   link.className = 'room-location-link';
-  link.href = `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${listing.address}, ${listing.location}`)}`;
+  link.href = listing.mapUrl || `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${listing.address}, ${listing.location}`)}`;
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
-  link.textContent = 'Map par dekhein ↗';
+  link.textContent = listing.mapUrl ? 'Owner ka Google Maps link ↗' : 'Address map par dekhein ↗';
   return link;
 }
 
@@ -143,7 +143,9 @@ function createListingCard(listing) {
   const image = document.createElement('img');
   image.alt = `${listing.title} ki photo`;
   image.loading = 'lazy';
-  image.src = listing.image || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85';
+  image.src = listing.image
+    ? (listing.image.startsWith('/') ? `${apiBaseUrl}${listing.image}` : listing.image)
+    : 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85';
   image.addEventListener('error', () => {
     image.src = 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85';
   }, { once: true });
@@ -180,6 +182,19 @@ function createListingCard(listing) {
   const beds = document.createElement('li');
   beds.textContent = `${listing.beds} bed`;
   features.append(propertyType, beds);
+
+  if (listing.bathroomImage) {
+    const bathroomPhoto = document.createElement('div');
+    bathroomPhoto.className = 'bathroom-photo';
+    const bathroomImage = document.createElement('img');
+    bathroomImage.src = `${apiBaseUrl}${listing.bathroomImage}`;
+    bathroomImage.alt = `${listing.title} ke washroom ki photo`;
+    bathroomImage.loading = 'lazy';
+    const bathroomLabel = document.createElement('span');
+    bathroomLabel.textContent = 'Washroom ki photo';
+    bathroomPhoto.append(bathroomImage, bathroomLabel);
+    body.append(bathroomPhoto);
+  }
 
   const bookButton = document.createElement('button');
   bookButton.className = 'room-book-btn';
@@ -406,24 +421,70 @@ hostListingForm.addEventListener('submit', async (event) => {
 
   const button = hostListingForm.querySelector('button[type="submit"]');
   const defaultText = button.textContent;
+  const roomPhoto = document.getElementById('listingImage').files[0];
+  const bathroomPhoto = document.getElementById('bathroomImage').files[0];
+  if (!roomPhoto || roomPhoto.size > 2 * 1024 * 1024 || (bathroomPhoto && bathroomPhoto.size > 2 * 1024 * 1024)) {
+    showMessage(hostListingMessage, 'Room ki photo zaroori hai. Har photo 2 MB ya usse chhoti honi chahiye.', true);
+    return;
+  }
   setLoading(button, true, 'Listing publish ho rahi hai…', defaultText);
 
   try {
+    const formData = new FormData(hostListingForm);
+    if (!formData.get('bathroomPhoto')?.size) formData.delete('bathroomPhoto');
     const result = await apiRequest(
       '/api/listings',
-      requestOptions(Object.fromEntries(new FormData(hostListingForm)), sessionStorage.getItem(ownerTokenKey)),
+      {
+        method: 'POST',
+        headers: { Authorization: "Bearer " + sessionStorage.getItem(ownerTokenKey) },
+        body: formData,
+      },
     );
     hostListingForm.reset();
     document.getElementById('listingBeds').value = '1';
     renderListings([result.data, ...publicListings]);
-    document.getElementById('resultsMessage').textContent = 'Aapka room address aur monthly rent ke saath sabhi visitors ke liye publish ho gaya.';
-    showMessage(hostListingMessage, 'Room listing cloud database mein save aur publish ho gayi.');
+    document.getElementById('resultsMessage').textContent = 'Aapka room photos, map aur monthly rent ke saath sabhi visitors ke liye publish ho gaya.';
+    showMessage(hostListingMessage, 'Room listing, photo aur map link cloud database mein save aur publish ho gaye.');
     document.getElementById('stays').scrollIntoView({ behavior: 'smooth' });
   } catch (error) {
     showMessage(hostListingMessage, error.message, true);
   } finally {
     setLoading(button, false, '', defaultText);
   }
+});
+
+[
+  ['listingImage', 'roomPhotoPreview'],
+  ['bathroomImage', 'bathroomPhotoPreview'],
+].forEach(([inputId, previewId]) => {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  let previewUrl;
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    preview.classList.add('hidden');
+    preview.removeAttribute('src');
+
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      input.value = '';
+      showMessage(hostListingMessage, 'Har photo 2 MB ya usse chhoti honi chahiye.', true);
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      input.value = '';
+      showMessage(hostListingMessage, 'Sirf JPG, PNG ya WebP photo upload karein.', true);
+      return;
+    }
+
+    previewUrl = URL.createObjectURL(file);
+    preview.src = previewUrl;
+    preview.classList.remove('hidden');
+    hostListingMessage.classList.add('hidden');
+  });
 });
 
 bookingForm.addEventListener('submit', async (event) => {

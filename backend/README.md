@@ -1,6 +1,6 @@
 # Sukoon Stay API
 
-The API stores owner accounts, monthly room listings, and tenant booking requests in MySQL. Online payments are deliberately not enabled: booking requests do not charge a tenant or collect card details.
+The API stores owner accounts, monthly room listings and photos, and tenant booking requests in MySQL. Listing room photos and Google Maps links are public. Online payments are deliberately not enabled: booking requests do not charge a tenant or collect card details.
 
 ## Run locally
 
@@ -30,7 +30,8 @@ The API listens on port `5000` by default. `/health` checks the database connect
 - `POST /api/auth/register-tenant` — create a renter account with name, phone, email, and password; passwords are stored as scrypt hashes.
 - `POST /api/auth/login-tenant` — sign in to a renter account.
 - `GET /api/listings` — list public rooms and flats, including their advertised address.
-- `POST /api/listings` — publish a room listing; requires an owner token in the `Authorization: Bearer` header.
+- `POST /api/listings` — publish a room listing with its Google Maps link, required room photo, and optional washroom photo; requires an owner token in the `Authorization: Bearer` header. Photos can be JPEG, PNG, or WebP up to 2 MB each.
+- `GET /api/listings/:id/photos/room` and `/api/listings/:id/photos/bathroom` — serve public listing photos.
 - `POST /api/bookings` — save a signed-in tenant's move-in request and account contact details. The monthly rent is read from the listing in the database, not from the browser.
 - `GET /api/bookings/owner` — read tenant contact details for the signed-in owner's own listings.
 
@@ -51,6 +52,7 @@ The GitHub Pages site only supports HTTPS APIs. Configure `CORS_ORIGINS` with th
 
 - MySQL stores owner accounts and password hashes, public property details, and booking contact details. The tenant's name, email, and phone are visible only to the owner of the selected listing through the authenticated owner-bookings endpoint.
 - When upgrading an existing database created before renter accounts were added, run `migrations/001_tenant_accounts.sql` once before deploying the updated API.
-- A listing's full address and map search link are public by design. Owners should only publish an address they are comfortable showing publicly.
+- When upgrading an existing database created before owner map links and photo uploads were added, run `migrations/002_listing_photos_and_maps.sql` once before deploying the updated API.
+- A listing's full address, owner-provided Google Maps link, room photo, and optional washroom photo are public by design. Owners should only publish information and photos they are comfortable showing publicly. Uploaded images are stored in MySQL.
 - The current static site does not share browser-local listings. Listings and booking requests become shared only after the API URL is configured and the API/database are deployed.
 - No online payment provider is connected. Do not ask tenants to enter card details on this site; integrate a hosted payment gateway and verify payments on the server before accepting money.

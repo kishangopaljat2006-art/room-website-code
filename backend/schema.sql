@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS RentalListings (
     Bedrooms TINYINT UNSIGNED NOT NULL,
     Description VARCHAR(300) NOT NULL,
     PhotoURL VARCHAR(500) NULL,
+    MapURL VARCHAR(500) NULL,
     IsActive BOOLEAN NOT NULL DEFAULT TRUE,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_rental_listings_public (IsActive, City),
@@ -80,6 +81,17 @@ CREATE TABLE IF NOT EXISTS RentalListings (
         FOREIGN KEY (OwnerID) REFERENCES OwnerAccounts(OwnerID) ON DELETE CASCADE,
     CONSTRAINT chk_rental_listing_rent CHECK (MonthlyRent > 0 AND MonthlyRent <= 1000000),
     CONSTRAINT chk_rental_listing_bedrooms CHECK (Bedrooms > 0 AND Bedrooms <= 30)
+);
+
+CREATE TABLE IF NOT EXISTS RentalListingPhotos (
+    ListingID BIGINT UNSIGNED PRIMARY KEY,
+    RoomPhoto MEDIUMBLOB NOT NULL,
+    RoomPhotoMime ENUM('image/jpeg', 'image/png', 'image/webp') NOT NULL,
+    BathroomPhoto MEDIUMBLOB NULL,
+    BathroomPhotoMime ENUM('image/jpeg', 'image/png', 'image/webp') NULL,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_rental_listing_photo
+        FOREIGN KEY (ListingID) REFERENCES RentalListings(ListingID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS RentalBookings (

@@ -148,7 +148,7 @@
               <h2>Apna room ya flat list karein</h2>
             </div>
             <p class="booking-intro">Owner account banayein ya sign in karein. Aapki listing cloud database mein save hogi aur sabhi visitors ko dikh sakti hai.</p>
-            <p class="privacy-note">Public listing mein aapka diya hua address aur map link sabhi visitors ko dikhai dega. Booking par tenant ka naam, phone aur email sirf sign-in kiye hue owner ko dikhte hain.</p>
+            <p class="privacy-note">Public listing mein address, map link aur upload ki hui photos sabhi visitors ko dikhai denge. Booking par tenant ka naam, phone aur email sirf sign-in kiye hue owner ko dikhte hain.</p>
 
             <div class="owner-auth-grid">
               <form id="ownerRegisterForm" class="owner-auth-form">
@@ -223,6 +223,11 @@
                 </div>
 
                 <div class="form-group">
+                  <label for="listingMapUrl">Google Maps share link</label>
+                  <input id="listingMapUrl" name="mapUrl" type="url" maxlength="500" placeholder="https://maps.app.goo.gl/..." required />
+                </div>
+
+                <div class="form-group">
                   <label for="listingPrice">Mahine ka kiraya (₹)</label>
                   <input id="listingPrice" name="price" type="number" min="1" max="1000000" step="1" placeholder="Jaise: 12000" required />
                 </div>
@@ -238,8 +243,17 @@
                 </div>
 
                 <div class="form-group host-description">
-                  <label for="listingImage">Room ki photo ka link <span class="field-hint">(optional)</span></label>
-                  <input id="listingImage" name="image" type="url" placeholder="https://example.com/room-photo.jpg" />
+                  <label for="listingImage">Room ki photo</label>
+                  <input id="listingImage" name="roomPhoto" type="file" accept="image/jpeg,image/png,image/webp" required aria-describedby="roomPhotoHint" />
+                  <span id="roomPhotoHint" class="field-hint">JPG, PNG ya WebP · zyada se zyada 2 MB. Photo public listing mein dikhegi.</span>
+                  <img id="roomPhotoPreview" class="upload-preview hidden" alt="Room photo preview" />
+                </div>
+
+                <div class="form-group host-description">
+                  <label for="bathroomImage">Washroom ki photo <span class="field-hint">(optional)</span></label>
+                  <input id="bathroomImage" name="bathroomPhoto" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="bathroomPhotoHint" />
+                  <span id="bathroomPhotoHint" class="field-hint">JPG, PNG ya WebP · zyada se zyada 2 MB. Photo public listing mein dikhegi.</span>
+                  <img id="bathroomPhotoPreview" class="upload-preview hidden" alt="Washroom photo preview" />
                 </div>
                 </div>
               </fieldset>
