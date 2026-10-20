@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Apne agle safar ke liye aaramdayak aur khaas stay aasani se book karein." />
     <meta name="theme-color" content="#fffaf5" />
+    <meta name="api-base-url" content="" />
     <title>Sukoon Stay | Aapka agla stay</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +25,7 @@
 
         <nav class="nav-links" aria-label="Main navigation">
           <a href="#home">Home</a>
-          <a href="#stays">Stays</a>
+          <a href="#stays">Rooms</a>
           <a href="#host">Makan malik?</a>
           <a href="#booking">Booking</a>
           <a href="#payments">Payment</a>
@@ -71,7 +72,7 @@
             <form class="search-bar" id="searchForm" role="search">
               <div>
                 <label for="destination">Kahan jaana hai?</label>
-                <input id="destination" name="destination" type="search" placeholder="Jaise: beach, lake, city" autocomplete="off" />
+                <input id="destination" name="destination" type="search" placeholder="Jaise: Jaipur, Malviya Nagar" autocomplete="off" />
               </div>
               <div>
                 <label for="checkIn">Kab se chahiye?</label>
@@ -81,9 +82,9 @@
             </form>
 
             <div class="rating-row">
-              <div><strong>4.9 ★</strong><span>Mehmaan rating</span></div>
-              <div><strong>1.8k+</strong><span>Khush mehmaan</span></div>
-              <div><strong>Asaan</strong><span>Booking support</span></div>
+              <div><strong>Mahine bhar</strong><span>Monthly rent</span></div>
+              <div><strong>Location</strong><span>Address aur map</span></div>
+              <div><strong>Owner</strong><span>Sign-in se listing</span></div>
             </div>
           </div>
 
@@ -97,13 +98,9 @@
               />
               <div class="hero-image-shade" aria-hidden="true"></div>
               <div class="feature-card-content">
-                <span class="pill">Mehmaanon ki pasand</span>
-                <h3>Aaramdayak modern flat</h3>
-                <p>Khula living room · Saaf-suthra · Ghar jaisa aaram</p>
-                <div class="price-row">
-                  <strong>₹18,000</strong>
-                  <span>/ mahina se</span>
-                </div>
+                <span class="pill">Room ki sample photo</span>
+                <h3>Apne liye sahi jagah dhoondhein</h3>
+                <p>Live room listings, kiraya aur location neeche dekhein.</p>
               </div>
             </div>
           </div>
@@ -120,15 +117,15 @@
           <div class="feature-box">
             <span>💬</span>
             <div>
-              <h4>Seedhi booking</h4>
+              <h4>Booking request</h4>
               <p>Mahine ke kiraaye par room chunein aur move-in date bhejein.</p>
             </div>
           </div>
           <div class="feature-box">
             <span>🔒</span>
             <div>
-              <h4>Saaf payment jaankari</h4>
-              <p>Payment se pehle booking aur amount dekhein.</p>
+              <h4>Payment abhi enabled nahi</h4>
+              <p>Online payment abhi collect nahi hoti.</p>
             </div>
           </div>
         </section>
@@ -140,59 +137,8 @@
             <p class="booking-intro">Upar diye gaye kiraaye demo hain. Makan malik apne room ki asli location, address aur monthly rent neeche add kar sakte hain.</p>
           </div>
 
-          <p class="results-message" id="resultsMessage" aria-live="polite"></p>
-          <div class="room-grid" id="roomGrid">
-            <article class="room-card" data-service-id="101" data-location="lake nature peaceful">
-              <div class="room-visual visual-one"></div>
-              <div class="room-body">
-                <div class="room-top">
-                  <h3>Lake House</h3>
-                  <span>₹12,000 <small>/ mahina</small></span>
-                </div>
-                <p>Aaramdayak kamra, garam interiors aur sukoon bhara nazara.</p>
-                <ul>
-                  <li>2 bed</li>
-                  <li>Kitchen</li>
-                  <li>Wi-Fi</li>
-                </ul>
-                <button class="room-book-btn" type="button" data-service-id="101">Yeh stay chunein</button>
-              </div>
-            </article>
-
-            <article class="room-card" data-service-id="102" data-location="city urban loft">
-              <div class="room-visual visual-two"></div>
-              <div class="room-body">
-                <div class="room-top">
-                  <h3>City Loft</h3>
-                  <span>₹16,000 <small>/ mahina</small></span>
-                </div>
-                <p>Shehar ke paas modern loft, khoobsurat sajawat aur aasaan pahunch.</p>
-                <ul>
-                  <li>1 bed</li>
-                  <li>Workspace</li>
-                  <li>Smart lock</li>
-                </ul>
-                <button class="room-book-btn" type="button" data-service-id="102">Yeh stay chunein</button>
-              </div>
-            </article>
-
-            <article class="room-card" data-service-id="103" data-location="forest cabin nature quiet">
-              <div class="room-visual visual-three"></div>
-              <div class="room-body">
-                <div class="room-top">
-                  <h3>Forest Cabin</h3>
-                  <span>₹18,000 <small>/ mahina</small></span>
-                </div>
-                <p>Hariyali ke beech aaramdayak cabin aur shaant mahaul.</p>
-                <ul>
-                  <li>3 bed</li>
-                  <li>Deck</li>
-                  <li>Heating</li>
-                </ul>
-                <button class="room-book-btn" type="button" data-service-id="103">Yeh stay chunein</button>
-              </div>
-            </article>
-          </div>
+          <p class="results-message" id="resultsMessage" aria-live="polite">Rooms load ho rahe hain…</p>
+          <div class="room-grid" id="roomGrid"></div>
         </section>
 
         <section class="host-section" id="host">
@@ -201,11 +147,55 @@
               <span class="eyebrow accent">Makan malik ke liye</span>
               <h2>Apna room ya flat list karein</h2>
             </div>
-            <p class="booking-intro">Room ki jaankari, kiraya aur location bharein. Listing save hote hi stay list mein address aur map link ke saath dikhegi.</p>
-            <p class="privacy-note">Aapka poora address listing par sabhi ko dikhega. Sirf wahi address share karein jo aap public dikhana chahte hain. Demo listing isi browser mein save hoti hai.</p>
+            <p class="booking-intro">Owner account banayein ya sign in karein. Aapki listing cloud database mein save hogi aur sabhi visitors ko dikh sakti hai.</p>
+            <p class="privacy-note">Public listing mein aapka diya hua address aur map link sabhi visitors ko dikhai dega. Booking par tenant ka naam, phone aur email sirf sign-in kiye hue owner ko dikhte hain.</p>
+
+            <div class="owner-auth-grid">
+              <form id="ownerRegisterForm" class="owner-auth-form">
+                <h3>Naya owner account</h3>
+                <div class="form-group">
+                  <label for="ownerName">Aapka naam</label>
+                  <input id="ownerName" name="name" type="text" maxlength="100" autocomplete="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="ownerPhone">Phone number</label>
+                  <input id="ownerPhone" name="phone" type="tel" maxlength="20" autocomplete="tel" required />
+                </div>
+                <div class="form-group">
+                  <label for="ownerRegisterEmail">Email</label>
+                  <input id="ownerRegisterEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+                </div>
+                <div class="form-group">
+                  <label for="ownerRegisterPassword">Password (kam se kam 10 characters)</label>
+                  <input id="ownerRegisterPassword" name="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required />
+                </div>
+                <button type="submit" class="primary-btn block-btn">Owner account banayein</button>
+              </form>
+
+              <form id="ownerLoginForm" class="owner-auth-form">
+                <h3>Owner sign in</h3>
+                <div class="form-group">
+                  <label for="ownerLoginEmail">Email</label>
+                  <input id="ownerLoginEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+                </div>
+                <div class="form-group">
+                  <label for="ownerLoginPassword">Password</label>
+                  <input id="ownerLoginPassword" name="password" type="password" maxlength="128" autocomplete="current-password" required />
+                </div>
+                <button type="submit" class="primary-btn block-btn">Sign in karke listing manage karein</button>
+                <button id="ownerLogoutButton" type="button" class="text-btn hidden">Sign out</button>
+              </form>
+            </div>
+            <div id="ownerAuthMessage" class="alert-message hidden" role="status" aria-live="polite"></div>
+            <div id="ownerBookings" class="owner-bookings hidden">
+              <h3>Aapke room ki booking requests</h3>
+              <div id="ownerBookingsList"></div>
+            </div>
 
             <form id="hostListingForm">
-              <div class="host-form-grid">
+              <fieldset id="hostListingFields" disabled>
+                <legend>Room ki jaankari</legend>
+                <div class="host-form-grid">
                 <div class="form-group">
                   <label for="listingTitle">Room / flat ka naam</label>
                   <input id="listingTitle" name="title" type="text" maxlength="70" placeholder="Jaise: Aaramdayak 1BHK flat" required />
@@ -251,9 +241,10 @@
                   <label for="listingImage">Room ki photo ka link <span class="field-hint">(optional)</span></label>
                   <input id="listingImage" name="image" type="url" placeholder="https://example.com/room-photo.jpg" />
                 </div>
-              </div>
+                </div>
+              </fieldset>
 
-              <button type="submit" class="primary-btn block-btn">Room listing save karein</button>
+              <button type="submit" class="primary-btn block-btn" disabled>Owner sign in karke listing save karein</button>
             </form>
             <div id="hostListingMessage" class="alert-message hidden" role="status" aria-live="polite"></div>
           </div>
@@ -268,11 +259,11 @@
             </div>
 
             <form id="bookingForm">
-              <input id="userId" name="userId" type="hidden" value="1" />
-
               <div class="form-group">
-                <label for="serviceId">Stay ID</label>
-                <input id="serviceId" name="serviceId" type="number" min="1" value="101" required />
+                <label for="listingId">Room / flat</label>
+                <select id="listingId" name="listingId" required>
+                  <option value="">Pehle rooms load hone dein</option>
+                </select>
               </div>
 
               <div class="form-group">
@@ -280,6 +271,19 @@
                 <input id="bookingDate" name="bookingDate" type="date" required />
               </div>
 
+              <div class="form-group">
+                <label for="tenantName">Aapka naam</label>
+                <input id="tenantName" name="name" type="text" maxlength="100" autocomplete="name" required />
+              </div>
+              <div class="form-group">
+                <label for="tenantEmail">Email</label>
+                <input id="tenantEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+              </div>
+              <div class="form-group">
+                <label for="tenantPhone">Phone number</label>
+                <input id="tenantPhone" name="phone" type="tel" maxlength="20" autocomplete="tel" required />
+              </div>
+              <p class="privacy-note">Naam, email aur phone owner ke saath booking request process karne ke liye share honge. Payment abhi setup nahi hai.</p>
               <button type="submit" class="primary-btn block-btn">Booking request bhejein</button>
             </form>
 
@@ -288,32 +292,17 @@
 
           <div class="card-panel payment-panel" id="payments">
             <div class="section-head">
-              <span class="eyebrow accent">Booking ke baad</span>
-              <h2>Payment ki jaankari</h2>
-              <p class="booking-intro">Booking confirm hone ke baad payment ka agla step yahan dikhai dega.</p>
+              <span class="eyebrow accent">Payment baad mein</span>
+              <h2>Payment abhi available nahi</h2>
+              <p class="booking-intro">Abhi sirf booking request database mein save hogi. Online payment gateway setup hone ke baad hi payment option khulega.</p>
             </div>
 
             <div id="paymentSection" class="payment-box hidden">
-              <p class="meta-label">Aapki booking ID</p>
+              <p class="meta-label">Booking request ID</p>
               <h3 id="bookingIdText">#0</h3>
-
               <p class="meta-label">Mahine ka kiraya</p>
               <h3 id="bookingPriceText">₹0</h3>
-
-              <form id="paymentForm">
-                <div class="form-group">
-                  <label for="paymentMethod">Payment ka tareeka</label>
-                  <select id="paymentMethod" name="paymentMethod">
-                    <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
-                    <option value="Debit Card">Debit / Credit card</option>
-                    <option value="Net Banking">Net banking</option>
-                  </select>
-                </div>
-
-                <button type="submit" class="success-btn block-btn">Payment karein</button>
-              </form>
-
-              <div id="paymentMessage" class="alert-message hidden" role="status" aria-live="polite"></div>
+              <p id="paymentMessage" class="booking-intro">Is demo mein koi online payment collect nahi hoti.</p>
             </div>
           </div>
         </section>

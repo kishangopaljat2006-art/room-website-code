@@ -1,46 +1,130 @@
+const apiBaseUrl = document.querySelector('meta[name="api-base-url"]').content.trim().replace(/\/+$/, '');
+const ownerTokenKey = 'sukoon-stay-owner-token';
+const ownerNameKey = 'sukoon-stay-owner-name';
 const bookingForm = document.getElementById('bookingForm');
-const paymentForm = document.getElementById('paymentForm');
-const paymentSection = document.getElementById('paymentSection');
 const bookingMessage = document.getElementById('bookingMessage');
-const paymentMessage = document.getElementById('paymentMessage');
-const bookingIdText = document.getElementById('bookingIdText');
-const bookingPriceText = document.getElementById('bookingPriceText');
 const bookingDateInput = document.getElementById('bookingDate');
 const checkInInput = document.getElementById('checkIn');
-const serviceIdInput = document.getElementById('serviceId');
+const listingSelect = document.getElementById('listingId');
 const roomGrid = document.getElementById('roomGrid');
+const resultsMessage = document.getElementById('resultsMessage');
 const hostListingForm = document.getElementById('hostListingForm');
 const hostListingMessage = document.getElementById('hostListingMessage');
-const hostListingsKey = 'sukoon-stay-host-listings';
+const ownerAuthMessage = document.getElementById('ownerAuthMessage');
+const ownerBookings = document.getElementById('ownerBookings');
+const ownerBookingsList = document.getElementById('ownerBookingsList');
+const hostListingFields = document.getElementById('hostListingFields');
+const hostListingSubmit = hostListingForm.querySelector('button[type="submit"]');
+const ownerLogoutButton = document.getElementById('ownerLogoutButton');
+let publicListings = [];
 
-function getSavedListings() {
-  const savedListings = localStorage.getItem(hostListingsKey);
-  if (!savedListings) return [];
-
-  const listings = JSON.parse(savedListings);
-  if (!Array.isArray(listings)) {
-    throw new Error('Saved listings ka data sahi format mein nahi hai.');
-  }
-
-  return listings;
+function showMessage(element, message, isError = false) {
+  element.textContent = message;
+  element.classList.remove('hidden', 'error');
+  if (isError) element.classList.add('error');
 }
 
-function createLocationLink(address, location) {
+function setLoading(button, isLoading, loadingText, defaultText) {
+  button.disabled = isLoading;
+  button.textContent = isLoading ? loadingText : defaultText;
+}
+
+function renderOwnerBookings(bookings) {
+  ownerBookingsList.replaceChildren();
+  if (!bookings.length) {
+    ownerBookingsList.textContent = 'Abhi koi booking request nahi aayi.';
+    return;
+  }
+
+  bookings.forEach((booking) => {
+    const item = document.createElement('article');
+    item.className = 'owner-booking-card';
+    const title = document.createElement('h4');
+    title.textContent = `${booking.title} · Request #${booking.bookingId}`;
+    const tenant = document.createElement('p');
+    tenant.textContent = `Tenant: ${booking.tenantName}`;
+    const contact = document.createElement('p');
+    contact.textContent = `Contact: ${booking.tenantPhone} · ${booking.tenantEmail}`;
+    const date = document.createElement('p');
+    date.textContent = `Move-in: ${booking.moveInDate} · Kiraya: ₹${Number(booking.monthlyRent).toLocaleString('en-IN')} / mahina`;
+    item.append(title, tenant, contact, date);
+    ownerBookingsList.append(item);
+  });
+}
+
+async function loadOwnerBookings() {
+  const token = sessionStorage.getItem(ownerTokenKey);
+  if (!token || !apiBaseUrl) return;
+
+  try {
+    const result = await apiRequest('/api/bookings/owner', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    renderOwnerBookings(result.data || []);
+  } catch (error) {
+    showMessage(ownerAuthMessage, `Booking requests load nahi ho paayin: ${error.message}`, true);
+  }
+}
+
+function localDateString(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const part = (type) => parts.find((item) => item.type === type).value;
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+async function apiRequest(path, options = {}) {
+  if (!apiBaseUrl) {
+    throw new Error('Shared listings aur bookings ke liye cloud backend setup pending hai.');
+  }
+
+  let response;
+  try {
+    response = await fetch(`${apiBaseUrl}${path}`, options);
+  } catch {
+    throw new Error('Cloud server se connection nahi ho paaya. Thodi der baad phir koshish karein.');
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error('Server se valid response nahi mila.');
+  }
+
+  if (!response.ok) {
+    if (response.status === 401) clearOwnerSession();
+    throw new Error(result?.message || 'Request poori nahi ho saki.');
+  }
+
+  return result;
+}
+
+function requestOptions(body, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return { method: 'POST', headers, body: JSON.stringify(body) };
+}
+
+function createLocationLink(listing) {
   const link = document.createElement('a');
   link.className = 'room-location-link';
-  link.href = `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${address}, ${location}`)}`;
+  link.href = `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${listing.address}, ${listing.location}`)}`;
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
   link.textContent = 'Map par dekhein ↗';
   return link;
 }
 
-function createHostListingCard(listing) {
+function createListingCard(listing) {
   const card = document.createElement('article');
-  card.className = 'room-card host-room-card';
-  card.dataset.serviceId = listing.id;
-  card.dataset.localOnly = 'true';
-  card.dataset.location = `${listing.location} ${listing.address}`;
+  card.className = 'room-card';
+  card.dataset.listingId = String(listing.id);
+  card.dataset.location = `${listing.location} ${listing.address}`.toLocaleLowerCase();
 
   const visual = document.createElement('div');
   visual.className = 'room-visual';
@@ -76,7 +160,7 @@ function createHostListingCard(listing) {
   locationName.textContent = listing.location;
   const address = document.createElement('span');
   address.textContent = listing.address;
-  locationDetails.append(locationName, address, createLocationLink(listing.address, listing.location));
+  locationDetails.append(locationName, address, createLocationLink(listing));
 
   const features = document.createElement('ul');
   const propertyType = document.createElement('li');
@@ -88,7 +172,7 @@ function createHostListingCard(listing) {
   const bookButton = document.createElement('button');
   bookButton.className = 'room-book-btn';
   bookButton.type = 'button';
-  bookButton.dataset.serviceId = listing.id;
+  bookButton.dataset.listingId = String(listing.id);
   bookButton.textContent = 'Yeh room chunein';
 
   body.append(heading, description, locationDetails, features, bookButton);
@@ -96,26 +180,65 @@ function createHostListingCard(listing) {
   return card;
 }
 
-try {
-  getSavedListings().forEach((listing) => roomGrid.append(createHostListingCard(listing)));
-} catch (error) {
-  showMessage(hostListingMessage, `Purani room listings load nahi ho sakin: ${error.message}`, true);
+function updateOwnerSession() {
+  const isSignedIn = Boolean(apiBaseUrl && sessionStorage.getItem(ownerTokenKey));
+  hostListingFields.disabled = !isSignedIn;
+  hostListingSubmit.disabled = !isSignedIn;
+  hostListingSubmit.textContent = isSignedIn ? 'Room listing publish karein' : 'Listing ke liye owner sign in karein';
+  ownerLogoutButton.classList.toggle('hidden', !isSignedIn);
+  ownerBookings.classList.toggle('hidden', !isSignedIn);
+  if (!isSignedIn) ownerBookingsList.replaceChildren();
+  if (isSignedIn) {
+    showMessage(ownerAuthMessage, `Owner sign in hai${sessionStorage.getItem(ownerNameKey) ? `: ${sessionStorage.getItem(ownerNameKey)}` : ''}.`);
+    loadOwnerBookings();
+  }
 }
 
-function showMessage(element, message, isError = false) {
-  element.textContent = message;
-  element.classList.remove('hidden', 'error');
-  if (isError) element.classList.add('error');
+function clearOwnerSession() {
+  sessionStorage.removeItem(ownerTokenKey);
+  sessionStorage.removeItem(ownerNameKey);
+  updateOwnerSession();
 }
 
-function setLoading(button, isLoading, loadingText, defaultText) {
-  button.disabled = isLoading;
-  button.textContent = isLoading ? loadingText : defaultText;
+function renderListings(listings, updateSource = true) {
+  if (updateSource) publicListings = listings;
+  roomGrid.replaceChildren(...listings.map(createListingCard));
+
+  listingSelect.replaceChildren();
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = listings.length ? 'Room ya flat chunein' : 'Abhi room available nahi hai';
+  listingSelect.append(placeholder);
+
+  listings.forEach((listing) => {
+    const option = document.createElement('option');
+    option.value = String(listing.id);
+    option.textContent = `${listing.title} · ${listing.location} · ₹${Number(listing.price).toLocaleString('en-IN')}/mahina`;
+    listingSelect.append(option);
+  });
+
+  bookingForm.querySelector('button[type="submit"]').disabled = listings.length === 0;
+  resultsMessage.textContent = listings.length
+    ? `${listings.length} room${listings.length === 1 ? '' : 's'} aur flat mile — location aur monthly rent dekhein.`
+    : 'Abhi koi room listed nahi hai. Makan malik apna room list kar sakte hain.';
 }
 
-function localDateString(date = new Date()) {
-  const offset = date.getTimezoneOffset();
-  return new Date(date.getTime() - offset * 60000).toISOString().split('T')[0];
+async function loadListings() {
+  if (!apiBaseUrl) {
+    resultsMessage.textContent = 'Shared listings dekhne ke liye cloud backend setup pending hai.';
+    listingSelect.innerHTML = '<option value="">Backend setup pending</option>';
+    bookingForm.querySelector('button[type="submit"]').disabled = true;
+    return;
+  }
+
+  try {
+    const result = await apiRequest('/api/listings');
+    renderListings(result.data || []);
+  } catch (error) {
+    resultsMessage.textContent = error.message;
+    listingSelect.innerHTML = '<option value="">Rooms load nahi ho paaye</option>';
+    bookingForm.querySelector('button[type="submit"]').disabled = true;
+  }
 }
 
 const today = localDateString();
@@ -123,6 +246,7 @@ bookingDateInput.min = today;
 checkInInput.min = today;
 bookingDateInput.value = today;
 checkInInput.value = today;
+updateOwnerSession();
 
 checkInInput.addEventListener('change', () => {
   bookingDateInput.value = checkInInput.value;
@@ -136,20 +260,15 @@ document.getElementById('searchForm').addEventListener('submit', (event) => {
   event.preventDefault();
 
   const query = document.getElementById('destination').value.trim().toLocaleLowerCase();
-  const cards = [...roomGrid.querySelectorAll('.room-card')];
-  let visibleCount = 0;
-
-  cards.forEach((card) => {
-    const searchableText = `${card.dataset.location} ${card.querySelector('h3').textContent} ${card.querySelector('.room-body').textContent}`.toLocaleLowerCase();
-    const matches = !query || searchableText.includes(query);
-    card.classList.toggle('hidden', !matches);
-    if (matches) visibleCount += 1;
+  const matchingListings = publicListings.filter((listing) => {
+    const searchableText = `${listing.location} ${listing.address} ${listing.title} ${listing.description}`.toLocaleLowerCase();
+    return !query || searchableText.includes(query);
   });
 
-  const resultsMessage = document.getElementById('resultsMessage');
-  resultsMessage.textContent = visibleCount
-    ? `${visibleCount} stay mile${visibleCount === 1 ? '' : 's'} — apni pasand chunein.`
-    : 'Is jagah par room nahi mila. Shehar ya area ka doosra naam try karein.';
+  renderListings(matchingListings, false);
+  if (query && matchingListings.length === 0) {
+    resultsMessage.textContent = 'Is area mein room nahi mila. Shehar ya area ka doosra naam try karein.';
+  }
   document.getElementById('stays').scrollIntoView({ behavior: 'smooth' });
 });
 
@@ -157,148 +276,104 @@ roomGrid.addEventListener('click', (event) => {
   const button = event.target.closest('.room-book-btn');
   if (!button) return;
 
-  const card = button.closest('.room-card');
-  if (card.dataset.localOnly === 'true') {
-    showMessage(bookingMessage, 'Yeh room demo listing hai jo sirf isi browser mein save hui hai. Iski online booking abhi available nahi hai.', true);
-    document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
-
-  serviceIdInput.value = button.dataset.serviceId;
+  listingSelect.value = button.dataset.listingId;
   bookingDateInput.value = checkInInput.value || today;
   bookingMessage.classList.add('hidden');
-  paymentSection.classList.add('hidden');
   document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
-  bookingDateInput.focus({ preventScroll: true });
+  listingSelect.focus({ preventScroll: true });
 });
 
-hostListingForm.addEventListener('submit', (event) => {
+async function submitOwnerAuth(form, endpoint, submitLabel) {
+  const button = form.querySelector('button[type="submit"]');
+  const defaultText = button.textContent;
+  setLoading(button, true, 'Please wait…', defaultText);
+  ownerAuthMessage.classList.add('hidden');
+
+  try {
+    const values = Object.fromEntries(new FormData(form));
+    const result = await apiRequest(endpoint, requestOptions(values));
+    sessionStorage.setItem(ownerTokenKey, result.data.token);
+    sessionStorage.setItem(ownerNameKey, result.data.name);
+    form.reset();
+    updateOwnerSession();
+    showMessage(ownerAuthMessage, `${result.data.name}, aap sign in ho gaye. Ab room listing publish kar sakte hain.`);
+  } catch (error) {
+    showMessage(ownerAuthMessage, error.message, true);
+  } finally {
+    setLoading(button, false, '', defaultText || submitLabel);
+  }
+}
+
+document.getElementById('ownerRegisterForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await submitOwnerAuth(event.currentTarget, '/api/auth/register-owner', 'Owner account banayein');
+});
+
+document.getElementById('ownerLoginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await submitOwnerAuth(event.currentTarget, '/api/auth/login-owner', 'Sign in');
+});
+
+ownerLogoutButton.addEventListener('click', () => {
+  clearOwnerSession();
+  showMessage(ownerAuthMessage, 'Aap sign out ho gaye.');
+});
+
+hostListingForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   hostListingMessage.classList.add('hidden');
 
-  const formData = new FormData(hostListingForm);
-  const image = String(formData.get('image')).trim();
-  if (image) {
-    let parsedImage;
-    try {
-      parsedImage = new URL(image);
-    } catch {
-      showMessage(hostListingMessage, 'Photo ke liye valid https:// ya http:// link daalein.', true);
-      return;
-    }
-    if (!['https:', 'http:'].includes(parsedImage.protocol)) {
-      showMessage(hostListingMessage, 'Photo ke liye valid https:// ya http:// link daalein.', true);
-      return;
-    }
-  }
-
-  const listing = {
-    id: String(Date.now()),
-    title: String(formData.get('title')).trim(),
-    type: String(formData.get('type')),
-    location: String(formData.get('location')).trim(),
-    address: String(formData.get('address')).trim(),
-    price: Number(formData.get('price')),
-    beds: Number(formData.get('beds')),
-    description: String(formData.get('description')).trim(),
-    image,
-  };
+  const button = hostListingForm.querySelector('button[type="submit"]');
+  const defaultText = button.textContent;
+  setLoading(button, true, 'Listing publish ho rahi hai…', defaultText);
 
   try {
-    const listings = getSavedListings();
-    listings.unshift(listing);
-    localStorage.setItem(hostListingsKey, JSON.stringify(listings));
-    roomGrid.prepend(createHostListingCard(listing));
+    const result = await apiRequest(
+      '/api/listings',
+      requestOptions(Object.fromEntries(new FormData(hostListingForm)), sessionStorage.getItem(ownerTokenKey)),
+    );
     hostListingForm.reset();
     document.getElementById('listingBeds').value = '1';
-    document.getElementById('resultsMessage').textContent = 'Aapka room location aur monthly rent ke saath list ho gaya.';
-    showMessage(hostListingMessage, 'Room listing save ho gayi. Yeh address aur map link ke saath isi device ke browser mein dikhegi.');
+    renderListings([result.data, ...publicListings]);
+    document.getElementById('resultsMessage').textContent = 'Aapka room address aur monthly rent ke saath sabhi visitors ke liye publish ho gaya.';
+    showMessage(hostListingMessage, 'Room listing cloud database mein save aur publish ho gayi.');
     document.getElementById('stays').scrollIntoView({ behavior: 'smooth' });
   } catch (error) {
-    showMessage(hostListingMessage, `Listing save nahi ho saki: ${error.message}`, true);
+    showMessage(hostListingMessage, error.message, true);
+  } finally {
+    setLoading(button, false, '', defaultText);
   }
 });
 
 bookingForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  paymentSection.classList.add('hidden');
   bookingMessage.classList.add('hidden');
-  paymentMessage.classList.add('hidden');
 
-  const submitButton = bookingForm.querySelector('button[type="submit"]');
-  const defaultText = submitButton.textContent;
-  setLoading(submitButton, true, 'Request bheji ja rahi hai...', defaultText);
+  const button = bookingForm.querySelector('button[type="submit"]');
+  const defaultText = button.textContent;
+  setLoading(button, true, 'Booking request save ho rahi hai…', defaultText);
+
+  const body = {
+    listingId: listingSelect.value,
+    moveInDate: bookingDateInput.value,
+    name: document.getElementById('tenantName').value.trim(),
+    email: document.getElementById('tenantEmail').value.trim(),
+    phone: document.getElementById('tenantPhone').value.trim(),
+  };
 
   try {
-    const response = await fetch('http://localhost:5000/api/bookings/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: document.getElementById('userId').value,
-        serviceId: serviceIdInput.value,
-        bookingDate: bookingDateInput.value,
-      }),
-    });
-    const result = await response.json();
-
-    if (!response.ok || !result?.data) {
-      throw new Error(result?.message || 'Booking request poori nahi ho saki.');
-    }
-
-    const bookingData = result.data;
-    bookingIdText.textContent = `#${bookingData.bookingId}`;
-    bookingPriceText.dataset.amount = bookingData.price;
-    bookingPriceText.textContent = `₹${Number(bookingData.price).toLocaleString('en-IN')} / mahina`;
-    showMessage(bookingMessage, `Booking request mil gayi! Aapki booking ID ${bookingData.bookingId} hai. Payment details neeche dekhein.`);
-    paymentSection.classList.remove('hidden');
-    paymentSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const result = await apiRequest('/api/bookings', requestOptions(body));
+    const booking = result.data;
+    document.getElementById('bookingIdText').textContent = `#${booking.bookingId}`;
+    document.getElementById('bookingPriceText').textContent = `₹${Number(booking.monthlyRent).toLocaleString('en-IN')} / mahina`;
+    showMessage(bookingMessage, `Aapki booking request save ho gayi. Request ID: ${booking.bookingId}. Makan malik aapse diye gaye phone/email par sampark kar sakte hain.`);
+    document.getElementById('paymentSection').classList.remove('hidden');
+    document.getElementById('payments').scrollIntoView({ behavior: 'smooth', block: 'center' });
   } catch (error) {
-    showMessage(
-      bookingMessage,
-      error instanceof TypeError
-        ? 'Booking service se connection nahi ho paaya. Thodi der baad phir koshish karein.'
-        : error.message,
-      true,
-    );
+    showMessage(bookingMessage, error.message, true);
   } finally {
-    setLoading(submitButton, false, '', defaultText);
+    setLoading(button, false, '', defaultText);
   }
 });
 
-paymentForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  paymentMessage.classList.add('hidden');
-
-  const submitButton = paymentForm.querySelector('button[type="submit"]');
-  const defaultText = submitButton.textContent;
-  setLoading(submitButton, true, 'Payment process ho raha hai...', defaultText);
-
-  try {
-    const response = await fetch('http://localhost:5000/api/payments/process', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        bookingId: bookingIdText.textContent.replace('#', ''),
-        amount: bookingPriceText.dataset.amount,
-        paymentMethod: document.getElementById('paymentMethod').value,
-      }),
-    });
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result?.message || 'Payment poora nahi ho paaya.');
-    }
-
-    showMessage(paymentMessage, result?.message || 'Payment safaltapurvak process ho gaya.');
-  } catch (error) {
-    showMessage(
-      paymentMessage,
-      error instanceof TypeError
-        ? 'Payment service se connection nahi ho paaya. Aapki booking ID yahin surakshit hai; thodi der baad phir koshish karein.'
-        : error.message,
-      true,
-    );
-  } finally {
-    setLoading(submitButton, false, '', defaultText);
-  }
-});
+loadListings();
