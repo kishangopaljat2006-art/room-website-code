@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=2" />
+    <link rel="stylesheet" href="styles.css?v=3" />
   </head>
   <body>
     <div class="page-shell">
@@ -24,14 +24,12 @@
         </div>
 
         <nav class="nav-links" aria-label="Main navigation">
-          <a href="#home">Home</a>
-          <a href="#stays">Rooms</a>
-          <a href="#host">Makan malik?</a>
-          <a href="#booking">Login / Register</a>
-          <a href="#payments">Payment</a>
+          <a href="#home" data-view-link="home">Home</a>
+          <a href="#renter" data-view-link="renter">Kirayedar</a>
+          <a href="#owner" data-view-link="owner">Makan malik</a>
         </nav>
 
-        <a class="nav-btn" href="#stays">Stay dekhein</a>
+        <a class="nav-btn" href="#renter" data-view-link="renter">Stay dekhein</a>
         <button id="languageToggle" class="language-toggle" type="button" aria-label="Switch language to English">
           <svg class="language-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="9"></circle>
@@ -41,34 +39,8 @@
         </button>
       </header>
 
-      <main id="home">
-        <section class="role-choice-section" aria-labelledby="roleChoiceTitle">
-          <div class="role-choice-heading">
-            <span class="eyebrow accent">Sukoon Stay par aapka swagat hai</span>
-            <h2 id="roleChoiceTitle">Aap kya karna chahte hain?</h2>
-            <p>Apne liye sahi raasta chunein — room dhoondhein ya apni property list karein.</p>
-          </div>
-          <div class="role-choice-grid">
-            <article class="role-card renter-role">
-              <span class="role-icon" aria-hidden="true">⌂</span>
-              <div>
-                <h3>Mujhe room rent par chahiye</h3>
-                <p>Mahine ke kiraaye par room dekhein, renter account banayein aur booking request bhejein.</p>
-                <a class="role-link" href="#booking">Renter login / registration <span aria-hidden="true">→</span></a>
-              </div>
-            </article>
-            <article class="role-card owner-role">
-              <span class="role-icon" aria-hidden="true">＋</span>
-              <div>
-                <h3>Main makan malik hoon</h3>
-                <p>Apne room ki details, monthly rent aur address dekar listing banayein.</p>
-                <a class="role-link" href="#host">Apna room list karein <span aria-hidden="true">→</span></a>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="hero">
+      <main id="appMain" data-view="home">
+        <section class="hero" data-page="home">
           <div class="hero-copy">
             <span class="eyebrow">Aapka swagat hai</span>
             <h1>Aisi jagah chunein, jahan dil ko sukoon mile.</h1>
@@ -113,7 +85,33 @@
           </div>
         </section>
 
-        <section class="feature-strip" aria-label="Sukoon Stay kyun chunein">
+        <section class="role-choice-section" data-page="home" aria-labelledby="roleChoiceTitle">
+          <div class="role-choice-heading">
+            <span class="eyebrow accent">Sukoon Stay par aapka swagat hai</span>
+            <h2 id="roleChoiceTitle">Aap kya karna chahte hain?</h2>
+            <p>Apne liye sahi raasta chunein — room dhoondhein ya apni property list karein.</p>
+          </div>
+          <div class="role-choice-grid">
+            <article class="role-card renter-role">
+              <span class="role-icon" aria-hidden="true">⌂</span>
+              <div>
+                <h3>Mujhe room rent par chahiye</h3>
+                <p>Mahine ke kiraaye par room dekhein, renter account banayein aur booking request bhejein.</p>
+                <a class="role-link" href="#renter" data-view-link="renter">Kirayedar ke liye aage badhein <span aria-hidden="true">→</span></a>
+              </div>
+            </article>
+            <article class="role-card owner-role">
+              <span class="role-icon" aria-hidden="true">＋</span>
+              <div>
+                <h3>Main makan malik hoon</h3>
+                <p>Apne room ki details, monthly rent aur address dekar listing banayein.</p>
+                <a class="role-link" href="#owner" data-view-link="owner">Makan malik ke liye aage badhein <span aria-hidden="true">→</span></a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="feature-strip" data-page="home" aria-label="Sukoon Stay kyun chunein">
           <div class="feature-box">
             <span>🏡</span>
             <div>
@@ -137,7 +135,14 @@
           </div>
         </section>
 
-        <section class="rooms-section" id="stays" aria-label="Popular rooms">
+        <section class="role-page-heading renter-page-heading" data-page="renter" aria-labelledby="renterPageTitle">
+          <a class="page-home-link" href="#home" data-view-link="home">← Home par wapas jaayein</a>
+          <span class="eyebrow accent">Kirayedar ke liye</span>
+          <h1 id="renterPageTitle">Apna agla room dhoondhein</h1>
+          <p>Rooms dekhein, account banayein aur booking request bhejein.</p>
+        </section>
+
+        <section class="rooms-section" id="stays" data-page="renter" aria-label="Popular rooms">
           <div class="section-head">
             <span class="eyebrow accent">Mahine ke kiraaye par</span>
             <h2>Rooms aur flats</h2>
@@ -148,8 +153,9 @@
           <div class="room-grid" id="roomGrid"></div>
         </section>
 
-        <section class="host-section" id="host">
+        <section class="host-section" id="host" data-page="owner">
           <div class="card-panel host-panel">
+            <a class="page-home-link" href="#home" data-view-link="home">← Home par wapas jaayein</a>
             <div class="section-head">
               <span class="eyebrow accent">Makan malik ke liye</span>
               <h2>Apna room ya flat list karein</h2>
@@ -271,7 +277,7 @@
           </div>
         </section>
 
-        <section class="booking-section" id="booking">
+        <section class="booking-section" id="booking" data-page="renter">
           <div class="card-panel booking-panel">
             <div class="section-head">
               <span class="eyebrow accent">Agla kadam</span>
@@ -372,6 +378,6 @@
       </footer>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
   </body>
 </html>

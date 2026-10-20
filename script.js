@@ -24,6 +24,7 @@ const tenantAuthForms = document.getElementById('tenantAuthForms');
 const tenantAuthMessage = document.getElementById('tenantAuthMessage');
 const tenantLogoutButton = document.getElementById('tenantLogoutButton');
 const bookingSubmit = bookingForm.querySelector('button[type="submit"]');
+const appMain = document.getElementById('appMain');
 let publicListings = [];
 let visibleListings = [];
 let ownerBookingData = [];
@@ -130,20 +131,22 @@ const messages = {
 const staticTranslations = [
   ['.brand-wrap small', 'A place that feels like home', 'हर सफ़र, घर जैसा'],
   ['nav[aria-label] a:nth-child(1)', 'Home', 'होम'],
-  ['nav[aria-label] a:nth-child(2)', 'Rooms', 'कमरे'],
-  ['nav[aria-label] a:nth-child(3)', 'Owners', 'मकान मालिक'],
-  ['nav[aria-label] a:nth-child(4)', 'Sign in', 'लॉगिन'],
-  ['nav[aria-label] a:nth-child(5)', 'Payments', 'भुगतान'],
+  ['nav[aria-label] a:nth-child(2)', 'Renters', 'किरायेदार'],
+  ['nav[aria-label] a:nth-child(3)', 'Property owners', 'मकान मालिक'],
   ['.nav-btn', 'Browse rooms', 'कमरे देखें'],
   ['.role-choice-heading .eyebrow', 'Welcome to Sukoon Stay', 'सुकून स्टे में आपका स्वागत है'],
   ['#roleChoiceTitle', 'What would you like to do?', 'आप क्या करना चाहेंगे?'],
   ['.role-choice-heading > p', 'Choose the right path for you — find a room or list your property.', 'अपने लिए सही रास्ता चुनें — कमरा ढूँढें या अपनी प्रॉपर्टी लिस्ट करें।'],
   ['.renter-role h3', 'I am looking to rent a room', 'मुझे किराये पर कमरा चाहिए'],
   ['.renter-role p', 'Browse monthly rooms, create a renter account, and send a booking request.', 'मासिक किराये पर कमरे देखें, किरायेदार खाता बनाएँ और बुकिंग अनुरोध भेजें।'],
-  ['.renter-role .role-link', 'Renter sign in / registration', 'किरायेदार लॉगिन / रजिस्ट्रेशन'],
+  ['.renter-role .role-link', 'Continue as a renter', 'किरायेदार के लिए आगे बढ़ें'],
   ['.owner-role h3', 'I am a property owner', 'मैं मकान मालिक हूँ'],
   ['.owner-role p', 'Create a listing with your room details, monthly rent, and address.', 'कमरे की जानकारी, मासिक किराया और पता देकर लिस्टिंग बनाएँ।'],
-  ['.owner-role .role-link', 'List your room', 'अपना कमरा लिस्ट करें'],
+  ['.owner-role .role-link', 'Continue as a property owner', 'मकान मालिक के लिए आगे बढ़ें'],
+  ['.renter-page-heading .eyebrow', 'For renters', 'किरायेदार के लिए'],
+  ['#renterPageTitle', 'Find your next room', 'अपना अगला कमरा ढूँढें'],
+  ['.renter-page-heading > p', 'Browse rooms, create an account, and send a booking request.', 'कमरे देखें, खाता बनाएँ और बुकिंग अनुरोध भेजें।'],
+  ['.page-home-link', '← Back to home', '← होम पर वापस जाएँ'],
   ['.hero-copy > .eyebrow', 'Welcome', 'आपका स्वागत है'],
   ['.hero-copy h1', 'Find a place where you can feel at home.', 'ऐसी जगह चुनें, जहाँ आपको घर जैसा सुकून मिले।'],
   ['.hero-copy > p', 'Find a comfortable room or flat by monthly rent, budget, and preference.', 'अपने बजट और पसंद के अनुसार मासिक किराये पर आरामदायक कमरा या फ्लैट ढूँढें।'],
@@ -323,6 +326,56 @@ document.getElementById('languageToggle').addEventListener('click', () => {
   localStorage.setItem(languageStorageKey, currentLanguage);
   applyLanguage();
 });
+
+function viewFromHash() {
+  const route = window.location.hash.slice(1).toLowerCase();
+  if (route === 'owner' || route === 'host') return 'owner';
+  if (['renter', 'stays', 'booking', 'payments'].includes(route)) return 'renter';
+  return 'home';
+}
+
+function renderPageView(view) {
+  appMain.dataset.view = view;
+  appMain.querySelectorAll('[data-page]').forEach((page) => {
+    page.hidden = page.dataset.page !== view;
+  });
+
+  document.querySelectorAll('.nav-links [data-view-link]').forEach((link) => {
+    if (link.dataset.viewLink === view) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+}
+
+function navigateToView(view, { replace = false, scrollTarget } = {}) {
+  const hash = view === 'home' ? '#home' : `#${view}`;
+  if (window.location.hash !== hash) {
+    window.history[replace ? 'replaceState' : 'pushState'](null, '', hash);
+  }
+  renderPageView(view);
+
+  requestAnimationFrame(() => {
+    if (scrollTarget) document.getElementById(scrollTarget).scrollIntoView({ behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+document.querySelectorAll('[data-view-link]').forEach((link) => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    navigateToView(link.dataset.viewLink);
+  });
+});
+
+window.addEventListener('popstate', () => {
+  renderPageView(viewFromHash());
+  window.scrollTo({ top: 0 });
+});
+
+window.addEventListener('hashchange', () => {
+  renderPageView(viewFromHash());
+});
+
+renderPageView(viewFromHash());
 
 function showMessage(element, message, isError = false) {
   delete element.dataset.languageKey;
@@ -648,17 +701,17 @@ document.getElementById('searchForm').addEventListener('submit', (event) => {
   if (query && matchingListings.length === 0) {
     resultsMessage.textContent = t('noSearchMatch');
   }
-  document.getElementById('stays').scrollIntoView({ behavior: 'smooth' });
+  navigateToView('renter', { scrollTarget: 'stays' });
 });
 
 roomGrid.addEventListener('click', (event) => {
   const button = event.target.closest('.room-book-btn');
   if (!button) return;
 
+  navigateToView('renter', { scrollTarget: 'booking' });
   listingSelect.value = button.dataset.listingId;
   bookingDateInput.value = checkInInput.value || today;
   bookingMessage.classList.add('hidden');
-  document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
   listingSelect.focus({ preventScroll: true });
 });
 
