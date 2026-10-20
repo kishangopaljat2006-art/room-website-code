@@ -5,9 +5,9 @@
 }
 
 :root {
-  --bg: #eef5ff;
+  --bg: #edf5ff;
   --bg-soft: #f9fbff;
-  --card: rgba(255, 255, 255, 0.92);
+  --card: rgba(255, 255, 255, 0.9);
   --card-strong: #ffffff;
   --primary: #1d4ed8;
   --primary-dark: #173ca7;
@@ -15,7 +15,7 @@
   --dark: #11213d;
   --text: #24324a;
   --muted: #5f6d84;
-  --border: rgba(17, 33, 61, 0.1);
+  --border: rgba(17, 33, 61, 0.08);
   --shadow: 0 25px 70px rgba(29, 78, 216, 0.13);
 }
 
@@ -355,11 +355,100 @@ main {
   line-height: 1.7;
 }
 
+.rooms-section {
+  margin-top: 50px;
+}
+
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  color: var(--dark);
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.room-card {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 20px 36px rgba(17, 33, 61, 0.06);
+}
+
+.room-visual {
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+}
+
+.visual-one {
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.5), rgba(16, 185, 129, 0.4)), url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;
+}
+
+.visual-two {
+  background: linear-gradient(135deg, rgba(17, 33, 61, 0.4), rgba(29, 78, 216, 0.35)), url('https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;
+}
+
+.visual-three {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(17, 33, 61, 0.4)), url('https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;
+}
+
+.room-content {
+  padding: 20px 20px 22px;
+}
+
+.room-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.room-top h3 {
+  color: var(--dark);
+  font-size: 1.3rem;
+}
+
+.room-top span {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.room-content p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.room-content ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.room-content li {
+  padding: 7px 10px;
+  background: rgba(29, 78, 216, 0.06);
+  border-radius: 999px;
+  color: var(--dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .booking-section {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 26px;
-  margin-top: 36px;
+  margin-top: 44px;
 }
 
 .card-panel {
@@ -461,7 +550,8 @@ main {
 
   .hero,
   .booking-section,
-  .features {
+  .features,
+  .room-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Digital Rental & Booking Portal" />
+    <meta 
+      name="description" 
+      content="Premium digital rental and room booking portal with modern booking and secure payment flow."
+    />
     <title>Digital Rental & Booking Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,23 +23,23 @@
         </div>
       </div>
 
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Main navigation">
         <a href="#home">Home</a>
+        <a href="#rooms">Rooms</a>
         <a href="#booking">Booking</a>
         <a href="#payments">Payments</a>
-        <a href="#contact">Contact</a>
       </nav>
 
-      <button class="nav-btn">Book Now</button>
+      <button class="nav-btn" type="button">Book Now</button>
     </header>
 
     <main id="home">
       <section class="hero">
         <div class="hero-copy">
           <span class="eyebrow">Smart Living • Flexible Booking</span>
-          <h1>Book your perfect room with a modern digital experience.</h1>
+          <h1>Book your perfect room with a premium digital experience.</h1>
           <p>
-            Discover premium spaces, effortless booking, and secure online payments in one powerful portal.
+            Discover modern rooms, effortless booking, and secure online payments in one smart portal built for comfort.
           </p>
 
           <div class="cta-row">
@@ -88,25 +91,82 @@
         </div>
       </section>
 
-      <section class="features">
+      <section class="features" aria-label="Features">
         <div class="feature-box">
           <div class="icon">⚡</div>
           <h3>Fast Booking</h3>
-          <p>Streamlined reservation flow for customers and managers.</p>
+          <p>Streamlined reservation flow for seamless customer experience.</p>
         </div>
         <div class="feature-box">
           <div class="icon">🔒</div>
           <h3>Secure Payment</h3>
-          <p>Protected checkout process with encrypted transactions.</p>
+          <p>Protected checkout process backed by trusted transaction handling.</p>
         </div>
         <div class="feature-box">
           <div class="icon">📍</div>
           <h3>Prime Locations</h3>
-          <p>Choose rooms in convenient and high-demand city areas.</p>
+          <p>Choose rooms in highly desirable and connected city neighborhoods.</p>
         </div>
       </section>
 
-      <section class="booking-section" id="booking">
+      <section class="rooms-section" id="rooms" aria-label="Available rooms">
+        <div class="section-header">
+          <span class="eyebrow accent">Featured Rooms</span>
+          <h2>Choose the room that fits your lifestyle</h2>
+        </div>
+
+        <div class="room-grid">
+          <article class="room-card">
+            <div class="room-visual visual-one"></div>
+            <div class="room-content">
+              <div class="room-top">
+                <h3>Studio Comfort</h3>
+                <span>₹2,899</span>
+              </div>
+              <p>Perfect for solo living with a cozy setup and fast connectivity.</p>
+              <ul>
+                <li>1 Bedroom</li>
+                <li>Wi‑Fi</li>
+                <li>24/7 Security</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="room-card">
+            <div class="room-visual visual-two"></div>
+            <div class="room-content">
+              <div class="room-top">
+                <h3>Skyline Deluxe</h3>
+                <span>₹3,799</span>
+              </div>
+              <p>Spacious rooms with premium interiors and city-light views.</p>
+              <ul>
+                <li>2 Bedroom</li>
+                <li>Balcony</li>
+                <li>Smart Lock</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="room-card">
+            <div class="room-visual visual-three"></div>
+            <div class="room-content">
+              <div class="room-top">
+                <h3>Executive Suite</h3>
+                <span>₹4,999</span>
+              </div>
+              <p>Luxury experience for professionals who want a refined stay.</p>
+              <ul>
+                <li>3 Bedroom</li>
+                <li>Workspace</li>
+                <li>Private Parking</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="booking-section" id="booking" aria-label="Booking form">
         <div class="form-panel card-panel">
           <div class="section-head">
             <span class="eyebrow accent">Booking</span>
@@ -167,7 +227,7 @@
       </section>
     </main>
 
-    <footer class="footer" id="contact">
+    <footer class="footer">
       <p>Digital Rental Portal • Your comfort, booked effortlessly.</p>
     </footer>
 
