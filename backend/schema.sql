@@ -16,6 +16,15 @@ CREATE TABLE IF NOT EXISTS OwnerAccounts (
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS TenantAccounts (
+    TenantID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(254) NOT NULL UNIQUE,
+    Phone VARCHAR(20) NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS Locations (
     LocationID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
@@ -76,6 +85,7 @@ CREATE TABLE IF NOT EXISTS RentalListings (
 CREATE TABLE IF NOT EXISTS RentalBookings (
     BookingID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     ListingID BIGINT UNSIGNED NOT NULL,
+    TenantID INT NULL,
     TenantName VARCHAR(100) NOT NULL,
     TenantEmail VARCHAR(254) NOT NULL,
     TenantPhone VARCHAR(20) NOT NULL,
@@ -84,6 +94,9 @@ CREATE TABLE IF NOT EXISTS RentalBookings (
     Status ENUM('Requested', 'Accepted', 'Declined', 'Cancelled') NOT NULL DEFAULT 'Requested',
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_rental_bookings_listing (ListingID, CreatedAt),
+    INDEX idx_rental_bookings_tenant (TenantID, CreatedAt),
+    CONSTRAINT fk_rental_booking_tenant
+        FOREIGN KEY (TenantID) REFERENCES TenantAccounts(TenantID) ON DELETE SET NULL,
     CONSTRAINT fk_rental_booking_listing
         FOREIGN KEY (ListingID) REFERENCES RentalListings(ListingID) ON DELETE RESTRICT
 );

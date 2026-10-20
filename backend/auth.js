@@ -93,7 +93,7 @@ function verifyAccessToken(token) {
     || !Number.isSafeInteger(payload.sub)
     || typeof payload.exp !== 'number'
     || payload.exp <= Math.floor(Date.now() / 1000)
-    || payload.role !== 'owner'
+    || !['owner', 'tenant'].includes(payload.role)
   ) {
     return null;
   }

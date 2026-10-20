@@ -255,8 +255,46 @@
             <div class="section-head">
               <span class="eyebrow accent">Agla kadam</span>
               <h2>Move-in request bhejein</h2>
-              <p class="booking-intro">Room ka mahine ka kiraya dekhein aur apni move-in date chunein. Request bhejne ke baad jaankari yahin dikhegi.</p>
+              <p class="booking-intro">Booking request ke liye renter account banayein ya sign in karein.</p>
             </div>
+
+            <div id="tenantAuthForms" class="owner-auth-grid">
+              <form id="tenantRegisterForm" class="owner-auth-form">
+                <h3>Naya renter account</h3>
+                <div class="form-group">
+                  <label for="tenantRegisterName">Aapka naam</label>
+                  <input id="tenantRegisterName" name="name" type="text" maxlength="100" autocomplete="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="tenantRegisterPhone">Phone number</label>
+                  <input id="tenantRegisterPhone" name="phone" type="tel" maxlength="20" autocomplete="tel" required />
+                </div>
+                <div class="form-group">
+                  <label for="tenantRegisterEmail">Email</label>
+                  <input id="tenantRegisterEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+                </div>
+                <div class="form-group">
+                  <label for="tenantRegisterPassword">Password (kam se kam 10 characters)</label>
+                  <input id="tenantRegisterPassword" name="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required />
+                </div>
+                <button type="submit" class="primary-btn block-btn">Renter account banayein</button>
+              </form>
+
+              <form id="tenantLoginForm" class="owner-auth-form">
+                <h3>Renter sign in</h3>
+                <div class="form-group">
+                  <label for="tenantLoginEmail">Email</label>
+                  <input id="tenantLoginEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+                </div>
+                <div class="form-group">
+                  <label for="tenantLoginPassword">Password</label>
+                  <input id="tenantLoginPassword" name="password" type="password" maxlength="128" autocomplete="current-password" required />
+                </div>
+                <button type="submit" class="primary-btn block-btn">Sign in</button>
+              </form>
+            </div>
+            <div id="tenantAuthMessage" class="alert-message hidden" role="status" aria-live="polite"></div>
+            <button id="tenantLogoutButton" type="button" class="text-btn hidden">Renter sign out</button>
 
             <form id="bookingForm">
               <div class="form-group">
@@ -273,18 +311,18 @@
 
               <div class="form-group">
                 <label for="tenantName">Aapka naam</label>
-                <input id="tenantName" name="name" type="text" maxlength="100" autocomplete="name" required />
+                <input id="tenantName" name="name" type="text" maxlength="100" autocomplete="name" readonly required />
               </div>
               <div class="form-group">
                 <label for="tenantEmail">Email</label>
-                <input id="tenantEmail" name="email" type="email" maxlength="254" autocomplete="email" required />
+                <input id="tenantEmail" name="email" type="email" maxlength="254" autocomplete="email" readonly required />
               </div>
               <div class="form-group">
                 <label for="tenantPhone">Phone number</label>
-                <input id="tenantPhone" name="phone" type="tel" maxlength="20" autocomplete="tel" required />
+                <input id="tenantPhone" name="phone" type="tel" maxlength="20" autocomplete="tel" readonly required />
               </div>
-              <p class="privacy-note">Naam, email aur phone owner ke saath booking request process karne ke liye share honge. Payment abhi setup nahi hai.</p>
-              <button type="submit" class="primary-btn block-btn">Booking request bhejein</button>
+              <p class="privacy-note">Aapke renter account ka naam, email aur phone booking request ke liye chune gaye room ke owner ke saath share honge. Payment abhi setup nahi hai.</p>
+              <button type="submit" class="primary-btn block-btn" disabled>Booking ke liye renter sign in karein</button>
             </form>
 
             <div id="bookingMessage" class="alert-message hidden" role="status" aria-live="polite"></div>

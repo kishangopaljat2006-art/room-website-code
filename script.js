@@ -1,6 +1,10 @@
 const apiBaseUrl = document.querySelector('meta[name="api-base-url"]').content.trim().replace(/\/+$/, '');
 const ownerTokenKey = 'sukoon-stay-owner-token';
 const ownerNameKey = 'sukoon-stay-owner-name';
+const tenantTokenKey = 'sukoon-stay-tenant-token';
+const tenantNameKey = 'sukoon-stay-tenant-name';
+const tenantEmailKey = 'sukoon-stay-tenant-email';
+const tenantPhoneKey = 'sukoon-stay-tenant-phone';
 const bookingForm = document.getElementById('bookingForm');
 const bookingMessage = document.getElementById('bookingMessage');
 const bookingDateInput = document.getElementById('bookingDate');
@@ -16,6 +20,10 @@ const ownerBookingsList = document.getElementById('ownerBookingsList');
 const hostListingFields = document.getElementById('hostListingFields');
 const hostListingSubmit = hostListingForm.querySelector('button[type="submit"]');
 const ownerLogoutButton = document.getElementById('ownerLogoutButton');
+const tenantAuthForms = document.getElementById('tenantAuthForms');
+const tenantAuthMessage = document.getElementById('tenantAuthMessage');
+const tenantLogoutButton = document.getElementById('tenantLogoutButton');
+const bookingSubmit = bookingForm.querySelector('button[type="submit"]');
 let publicListings = [];
 
 function showMessage(element, message, isError = false) {
@@ -97,7 +105,11 @@ async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401) clearOwnerSession();
+    if (response.status === 401) {
+      const token = options.headers?.Authorization?.replace(/^Bearer\s+/i, '');
+      if (token && token === sessionStorage.getItem(ownerTokenKey)) clearOwnerSession();
+      if (token && token === sessionStorage.getItem(tenantTokenKey)) clearTenantSession();
+    }
     throw new Error(result?.message || 'Request poori nahi ho saki.');
   }
 
@@ -200,6 +212,37 @@ function clearOwnerSession() {
   updateOwnerSession();
 }
 
+function updateBookingAccess() {
+  const isSignedIn = Boolean(apiBaseUrl && sessionStorage.getItem(tenantTokenKey));
+  bookingSubmit.disabled = !isSignedIn || publicListings.length === 0;
+  bookingSubmit.textContent = isSignedIn
+    ? 'Booking request bhejein'
+    : 'Booking ke liye renter sign in karein';
+}
+
+function updateTenantSession() {
+  const isSignedIn = Boolean(apiBaseUrl && sessionStorage.getItem(tenantTokenKey));
+  tenantAuthForms.classList.toggle('hidden', isSignedIn);
+  tenantLogoutButton.classList.toggle('hidden', !isSignedIn);
+  document.getElementById('tenantName').value = isSignedIn ? sessionStorage.getItem(tenantNameKey) || '' : '';
+  document.getElementById('tenantEmail').value = isSignedIn ? sessionStorage.getItem(tenantEmailKey) || '' : '';
+  document.getElementById('tenantPhone').value = isSignedIn ? sessionStorage.getItem(tenantPhoneKey) || '' : '';
+  if (isSignedIn) {
+    showMessage(tenantAuthMessage, `Renter sign in hai: ${sessionStorage.getItem(tenantNameKey) || ''}. Booking request mein aapki saved profile details jayengi.`);
+  } else {
+    tenantAuthMessage.classList.add('hidden');
+  }
+  updateBookingAccess();
+}
+
+function clearTenantSession() {
+  sessionStorage.removeItem(tenantTokenKey);
+  sessionStorage.removeItem(tenantNameKey);
+  sessionStorage.removeItem(tenantEmailKey);
+  sessionStorage.removeItem(tenantPhoneKey);
+  updateTenantSession();
+}
+
 function renderListings(listings, updateSource = true) {
   if (updateSource) publicListings = listings;
   roomGrid.replaceChildren(...listings.map(createListingCard));
@@ -217,7 +260,7 @@ function renderListings(listings, updateSource = true) {
     listingSelect.append(option);
   });
 
-  bookingForm.querySelector('button[type="submit"]').disabled = listings.length === 0;
+  updateBookingAccess();
   resultsMessage.textContent = listings.length
     ? `${listings.length} room${listings.length === 1 ? '' : 's'} aur flat mile — location aur monthly rent dekhein.`
     : 'Abhi koi room listed nahi hai. Makan malik apna room list kar sakte hain.';
@@ -227,7 +270,7 @@ async function loadListings() {
   if (!apiBaseUrl) {
     resultsMessage.textContent = 'Shared listings dekhne ke liye cloud backend setup pending hai.';
     listingSelect.innerHTML = '<option value="">Backend setup pending</option>';
-    bookingForm.querySelector('button[type="submit"]').disabled = true;
+    updateBookingAccess();
     return;
   }
 
@@ -237,7 +280,7 @@ async function loadListings() {
   } catch (error) {
     resultsMessage.textContent = error.message;
     listingSelect.innerHTML = '<option value="">Rooms load nahi ho paaye</option>';
-    bookingForm.querySelector('button[type="submit"]').disabled = true;
+    updateBookingAccess();
   }
 }
 
@@ -247,6 +290,7 @@ checkInInput.min = today;
 bookingDateInput.value = today;
 checkInInput.value = today;
 updateOwnerSession();
+updateTenantSession();
 
 checkInInput.addEventListener('change', () => {
   bookingDateInput.value = checkInInput.value;
@@ -314,6 +358,43 @@ document.getElementById('ownerLoginForm').addEventListener('submit', async (even
   await submitOwnerAuth(event.currentTarget, '/api/auth/login-owner', 'Sign in');
 });
 
+async function submitTenantAuth(form, endpoint) {
+  const button = form.querySelector('button[type="submit"]');
+  const defaultText = button.textContent;
+  setLoading(button, true, 'Please wait…', defaultText);
+  tenantAuthMessage.classList.add('hidden');
+
+  try {
+    const values = Object.fromEntries(new FormData(form));
+    const result = await apiRequest(endpoint, requestOptions(values));
+    sessionStorage.setItem(tenantTokenKey, result.data.token);
+    sessionStorage.setItem(tenantNameKey, result.data.name);
+    sessionStorage.setItem(tenantEmailKey, result.data.email);
+    sessionStorage.setItem(tenantPhoneKey, result.data.phone);
+    form.reset();
+    updateTenantSession();
+  } catch (error) {
+    showMessage(tenantAuthMessage, error.message, true);
+  } finally {
+    setLoading(button, false, '', defaultText);
+  }
+}
+
+document.getElementById('tenantRegisterForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await submitTenantAuth(event.currentTarget, '/api/auth/register-tenant');
+});
+
+document.getElementById('tenantLoginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await submitTenantAuth(event.currentTarget, '/api/auth/login-tenant');
+});
+
+tenantLogoutButton.addEventListener('click', () => {
+  clearTenantSession();
+  showMessage(tenantAuthMessage, 'Aap renter account se sign out ho gaye.');
+});
+
 ownerLogoutButton.addEventListener('click', () => {
   clearOwnerSession();
   showMessage(ownerAuthMessage, 'Aap sign out ho gaye.');
@@ -356,13 +437,13 @@ bookingForm.addEventListener('submit', async (event) => {
   const body = {
     listingId: listingSelect.value,
     moveInDate: bookingDateInput.value,
-    name: document.getElementById('tenantName').value.trim(),
-    email: document.getElementById('tenantEmail').value.trim(),
-    phone: document.getElementById('tenantPhone').value.trim(),
   };
 
   try {
-    const result = await apiRequest('/api/bookings', requestOptions(body));
+    const result = await apiRequest(
+      '/api/bookings',
+      requestOptions(body, sessionStorage.getItem(tenantTokenKey)),
+    );
     const booking = result.data;
     document.getElementById('bookingIdText').textContent = `#${booking.bookingId}`;
     document.getElementById('bookingPriceText').textContent = `₹${Number(booking.monthlyRent).toLocaleString('en-IN')} / mahina`;

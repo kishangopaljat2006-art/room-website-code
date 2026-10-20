@@ -1,12 +1,13 @@
 const express = require('express');
 const bookingController = require('./bookingController');
-const { requireOwner } = require('./authMiddleware');
+const { requireOwner, requireTenant } = require('./authMiddleware');
 const createRateLimiter = require('./rateLimit');
 
 const router = express.Router();
 
 router.post(
   '/',
+  requireTenant,
   createRateLimiter({
     windowMs: 15 * 60 * 1000,
     maxRequests: 10,

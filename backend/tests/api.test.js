@@ -59,6 +59,68 @@ test('owner registration hashes passwords and returns a signed owner token', asy
   assert.equal(auth.verifyAccessToken(`${res.body.data.token}invalid`), null);
 });
 
+test('tenant registration hashes passwords and returns a signed tenant token', async (t) => {
+  const originalExecute = db.execute;
+  let insertParameters;
+  db.execute = async (sql, parameters) => {
+    assert.match(sql, /INSERT INTO TenantAccounts/);
+    insertParameters = parameters;
+    return [{ insertId: 19 }, []];
+  };
+  t.after(() => {
+    db.execute = originalExecute;
+  });
+
+  const res = createResponse();
+  await authController.registerTenant({
+    body: {
+      name: 'New Tenant',
+      phone: '+919876543210',
+      email: 'TENANT@example.com',
+      password: 'test-tenant-password',
+    },
+  }, res, (error) => {
+    throw error;
+  });
+
+  assert.equal(res.statusCode, 201);
+  assert.equal(insertParameters[1], 'tenant@example.com');
+  assert.match(insertParameters[3], /^scrypt\$/);
+  assert.notEqual(insertParameters[3], 'test-tenant-password');
+  assert.deepEqual(auth.verifyAccessToken(res.body.data.token), { userId: 19, role: 'tenant' });
+});
+
+test('tenant sign-in returns account details and a tenant token', async (t) => {
+  const originalExecute = db.execute;
+  const passwordHash = await auth.hashPassword('test-tenant-password');
+  db.execute = async (sql, parameters) => {
+    assert.match(sql, /FROM TenantAccounts WHERE Email = \? LIMIT 1/);
+    assert.deepEqual(parameters, ['tenant@example.com']);
+    return [[{
+      UserID: 19,
+      Name: 'Tenant Name',
+      Email: 'tenant@example.com',
+      Phone: '+919876543210',
+      PasswordHash: passwordHash,
+      Role: 'tenant',
+    }], []];
+  };
+  t.after(() => {
+    db.execute = originalExecute;
+  });
+
+  const res = createResponse();
+  await authController.loginTenant({
+    body: { email: 'TENANT@example.com', password: 'test-tenant-password' },
+  }, res, (error) => {
+    throw error;
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(auth.verifyAccessToken(res.body.data.token), { userId: 19, role: 'tenant' });
+  assert.equal(res.body.data.phone, '+919876543210');
+});
+
 test('listing creation saves public address and monthly rent to the shared database', async (t) => {
   const originalExecute = db.execute;
   const calls = [];
@@ -113,6 +175,14 @@ test('booking saves the database rent snapshot instead of trusting browser price
     async beginTransaction() {},
     async execute(sql, parameters) {
       calls.push({ sql, parameters });
+      if (sql.includes('SELECT TenantID')) {
+        return [[{
+          TenantID: 19,
+          Name: 'Tenant',
+          Email: 'tenant@example.com',
+          Phone: '+919876543210',
+        }], []];
+      }
       if (sql.includes('SELECT ListingID')) {
         return [[{ ListingID: 33, MonthlyRent: '15000.00' }], []];
       }
@@ -134,20 +204,19 @@ test('booking saves the database rent snapshot instead of trusting browser price
 
   const res = createResponse();
   await bookingController.createBooking({
+    auth: { userId: 19, role: 'tenant' },
     body: {
       listingId: '33',
       moveInDate: '2099-01-02',
-      name: 'Tenant',
-      email: 'tenant@example.com',
-      phone: '+919876543210',
-      monthlyRent: 1,
     },
   }, res, (error) => {
     throw error;
   });
 
   assert.equal(res.statusCode, 201);
-  assert.equal(calls[1].parameters[5], '15000.00');
+  assert.equal(calls[2].parameters[1], 19);
+  assert.equal(calls[2].parameters[2], 'Tenant');
+  assert.equal(calls[2].parameters[6], '15000.00');
   assert.equal(res.body.data.monthlyRent, 15000);
   assert.equal(res.body.data.bookingId, 71);
   assert.equal(committed, true);

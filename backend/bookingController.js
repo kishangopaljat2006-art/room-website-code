@@ -25,23 +25,16 @@ function indiaToday() {
 
 exports.createBooking = async (req, res, next) => {
   const listingId = Number(req.body.listingId);
-  const name = textValue(req.body.name);
-  const email = textValue(req.body.email).toLowerCase();
-  const phone = textValue(req.body.phone);
   const moveInDate = req.body.moveInDate;
   const today = indiaToday();
 
   if (
     !Number.isSafeInteger(listingId) || listingId < 1
-    || !name || name.length > 100
-    || !EMAIL_PATTERN.test(email) || email.length > 254
-    || phone.length < 7 || phone.length > 20
-    || !/^[+\d][\d\s()-]{6,19}$/.test(phone)
     || !isValidDate(moveInDate) || moveInDate < today
   ) {
     return res.status(400).json({
       success: false,
-      message: 'Room, naam, valid email/phone aur aaj ya uske baad ki move-in date bharein.',
+      message: 'Room chunein aur aaj ya uske baad ki move-in date bharein.',
     });
   }
 
@@ -49,6 +42,21 @@ exports.createBooking = async (req, res, next) => {
   try {
     connection = await db.getConnection();
     await connection.beginTransaction();
+
+    const [tenants] = await connection.execute(
+      'SELECT TenantID, Name, Email, Phone FROM TenantAccounts WHERE TenantID = ? LIMIT 1',
+      [req.auth.userId],
+    );
+    const tenant = tenants[0];
+    if (
+      !tenant
+      || !textValue(tenant.Name)
+      || !EMAIL_PATTERN.test(textValue(tenant.Email))
+      || !/^[+\d][\d\s()-]{6,19}$/.test(textValue(tenant.Phone))
+    ) {
+      await connection.rollback();
+      return res.status(401).json({ success: false, message: 'Tenant account verify nahi ho paaya. Dobara sign in karein.' });
+    }
 
     const [listings] = await connection.execute(
       `SELECT ListingID, MonthlyRent
@@ -65,9 +73,9 @@ exports.createBooking = async (req, res, next) => {
 
     const [result] = await connection.execute(
       `INSERT INTO RentalBookings
-       (ListingID, TenantName, TenantEmail, TenantPhone, MoveInDate, MonthlyRentSnapshot, Status)
-       VALUES (?, ?, ?, ?, ?, ?, 'Requested')`,
-      [listingId, name, email, phone, moveInDate, listings[0].MonthlyRent],
+       (ListingID, TenantID, TenantName, TenantEmail, TenantPhone, MoveInDate, MonthlyRentSnapshot, Status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'Requested')`,
+      [listingId, tenant.TenantID, tenant.Name, tenant.Email, tenant.Phone, moveInDate, listings[0].MonthlyRent],
     );
 
     await connection.commit();
@@ -78,6 +86,7 @@ exports.createBooking = async (req, res, next) => {
         bookingId: Number(result.insertId),
         listingId,
         moveInDate,
+        tenantName: tenant.Name,
         monthlyRent: Number(listings[0].MonthlyRent),
         status: 'Requested',
       },
